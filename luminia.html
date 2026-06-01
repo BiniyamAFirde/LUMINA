@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMINA — Neural-Adaptive Spatial Interface</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-deep: #050710;
+    --bg-card: #0d1022;
+    --bg-card2: #111428;
+    --border: rgba(100,120,255,0.15);
+    --border-glow: rgba(120,100,255,0.4);
+    --purple: #7c5cfc;
+    --purple-light: #9b7ffe;
+    --cyan: #3de8c8;
+    --pink: #f04f7a;
+    --amber: #ffb347;
+    --orange: #ff7a45;
+    --blue-mode: #1a2980;
+    --blue-mode2: #26d0ce;
+    --grad-title: linear-gradient(90deg, #4fc3f7 0%, #b39ddb 40%, #f48fb1 80%, #ff8a65 100%);
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg-deep);
+    color: #e0e4ff;
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── STARS background ── */
+  .stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(120,80,255,0.12) 0%, transparent 70%);
+  }
+  .stars::before {
+    content:'';
+    position: absolute; inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(200,200,255,0.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 50%, rgba(200,200,255,0.4) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 60% 15%, rgba(200,200,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 70%, rgba(200,200,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 85%, rgba(200,200,255,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 35%, rgba(200,200,255,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 65%, rgba(200,200,255,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 10%, rgba(200,200,255,0.5) 0%, transparent 100%);
+  }
+
+  /* ── SCREENS ── */
+  .screen {
+    display: none;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+    animation: fadeIn 0.4s ease;
+  }
+  .screen.active { display: flex; flex-direction: column; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── SCREEN 1: SPLASH ── */
+  #splash {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+  }
+  .splash-logo {
+    width: 80px; height: 80px;
+    margin-bottom: 2rem;
+    animation: float 4s ease-in-out infinite;
+  }
+  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+  .splash-title {
+    font-family: var(--font-head);
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    background: var(--grad-title);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+  .splash-sub {
+    color: rgba(200,210,255,0.5);
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 3rem;
+  }
+  .btn-primary {
+    background: rgba(120,100,255,0.25);
+    border: 1.5px solid rgba(120,100,255,0.6);
+    color: #d0d8ff;
+    font-family: var(--font-head);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.85rem 2.5rem;
+    border-radius: 99px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(120,100,255,0.3), inset 0 0 20px rgba(120,100,255,0.1);
+    transition: all 0.3s ease;
+    letter-spacing: 0.03em;
+  }
+  .btn-primary:hover {
+    background: rgba(120,100,255,0.4);
+    box-shadow: 0 0 50px rgba(120,100,255,0.5), inset 0 0 30px rgba(120,100,255,0.2);
+    transform: translateY(-2px);
+  }
+
+  /* ── ONBOARDING SCREENS (2,3,4) ── */
+  .onboard-screen {
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .onboard-card {
+    background: linear-gradient(145deg, #0d1240, #0a0e30);
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 540px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 0 60px rgba(80,60,200,0.15);
+  }
+  .onboard-card::before {
+    content:'';
+    position: absolute;
+    top: -50px; left: 50%; transform: translateX(-50%);
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    border: 1px solid rgba(120,100,255,0.2);
+    pointer-events: none;
+  }
+  .onboard-card::after {
+    content:'';
+    position: absolute;
+    top: -30px; left: 50%; transform: translateX(-50%);
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 1px solid rgba(120,100,255,0.3);
+    pointer-events: none;
+  }
+  .icon-circle {
+    width: 80px; height: 80px;
+    background: var(--purple);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 2rem;
+    font-size: 2rem;
+    box-shadow: 0 0 40px rgba(120,80,255,0.4);
+  }
+  .onboard-title {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  .onboard-sub {
+    color: rgba(180,190,255,0.6);
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+  }
+  .progress-dots {
+    display: flex; gap: 0.5rem; justify-content: center;
+    margin-bottom: 1.5rem;
+  }
+  .dot {
+    height: 4px; border-radius: 99px;
+    background: rgba(120,100,255,0.3);
+    flex: 1; max-width: 80px;
+    transition: background 0.3s;
+  }
+  .dot.active { background: var(--purple); }
+  .status-line {
+    color: var(--cyan);
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+  }
+  .status-line::before { content: '✓  '; }
+
+  /* ── SCREEN 5: CALIBRATION HUD ── */
+  #calibration {
+    padding: 2.5rem;
+    justify-content: flex-start;
+  }
+  .hud-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 1.2rem;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .hud-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 1.5rem;
+  }
+  .hud-label {
+    display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.9rem; color: rgba(200,210,255,0.7);
+    margin-bottom: 1rem;
+  }
+  .neural-wave {
+    height: 50px;
+    display: flex; align-items: center;
+  }
+  .neural-wave svg { width: 100%; height: 100%; }
+  .wave-path {
+    stroke: var(--purple);
+    stroke-width: 2;
+    fill: none;
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    animation: drawWave 2s ease forwards;
+  }
+  @keyframes drawWave { to { stroke-dashoffset: 0; } }
+  .hud-top-right {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    border: 2px solid var(--purple);
+    margin-left: auto;
+  }
+  .heart-card { grid-column: 1; }
+  .bpm-value {
+    color: var(--pink);
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    font-weight: 700;
+    float: right;
+  }
+  .bars {
+    display: flex; gap: 2px; align-items: flex-end;
+    height: 50px; margin-top: 0.5rem;
+  }
+  .bar {
+    flex: 1; background: var(--pink);
+    border-radius: 2px 2px 0 0;
+    opacity: 0.8;
+    animation: barPulse 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes barPulse { from{opacity:0.5} to{opacity:1} }
+  .eye-card {
+    grid-column: 2;
+    grid-row: 2 / 4;
+    width: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .eye-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .eye-dot {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: rgba(120,100,255,0.35);
+    transition: background 0.3s;
+  }
+  .eye-dot.active { background: var(--purple-light); box-shadow: 0 0 12px var(--purple); }
+  .crosshair {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    border: 1.5px solid var(--purple);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; margin-top: auto;
+  }
+  .crosshair::before, .crosshair::after {
+    content:''; position: absolute;
+    background: var(--purple); opacity: 0.6;
+  }
+  .crosshair::before { width: 1px; height: 100%; }
+  .crosshair::after { width: 100%; height: 1px; }
+  .crosshair-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--blue-mode2); z-index:1;
+  }
+  .progress-section { grid-column: 1; }
+  .big-label {
+    font-family: var(--font-head);
+    font-size: 1.2rem; font-weight: 700;
+    color: #fff; margin-bottom: 0.8rem;
+  }
+  .prog-bar-wrap {
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px; height: 8px; overflow: hidden;
+  }
+  .prog-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--purple), var(--purple-light));
+    border-radius: 99px;
+    transition: width 1.5s ease;
+  }
+  .prog-pct { color: rgba(200,210,255,0.5); font-size: 0.85rem; margin-top: 0.5rem; }
+
+  /* ── SCREEN 6: DASHBOARD ── */
+  #dashboard { padding: 2rem; }
+  .dash-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+  .dash-title {
+    font-family: var(--font-head);
+    font-size: 2rem; font-weight: 800;
+    background: var(--grad-title);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .dash-date { color: rgba(200,210,255,0.4); font-size: 0.85rem; margin-top: 0.3rem; }
+  .dash-icons { display: flex; gap: 0.75rem; }
+  .icon-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.1rem;
+    transition: all 0.2s;
+  }
+  .icon-btn:hover { border-color: var(--border-glow); background: var(--bg-card2); }
+
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .metric-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1rem;
+  }
+  .metric-icon { font-size: 1.2rem; margin-bottom: 0.4rem; }
+  .metric-val {
+    font-family: var(--font-head);
+    font-size: 2rem; font-weight: 700;
+    line-height: 1;
+  }
+  .metric-label { color: rgba(200,210,255,0.5); font-size: 0.8rem; margin-top: 0.2rem; }
+  .metric-bar { height: 3px; border-radius: 99px; margin-top: 0.6rem; }
+  .m-focus .metric-val { color: #3de8c8; }
+  .m-focus .metric-bar { background: linear-gradient(90deg, #3de8c8, rgba(61,232,200,0.2)); }
+  .m-stress .metric-val { color: var(--pink); }
+  .m-stress .metric-bar { background: linear-gradient(90deg, var(--pink), rgba(240,79,122,0.2)); }
+  .m-mental .metric-val { color: var(--purple-light); }
+  .m-mental .metric-bar { background: linear-gradient(90deg, var(--purple-light), rgba(155,127,254,0.2)); }
+  .m-energy .metric-val { color: var(--cyan); }
+  .m-energy .metric-bar { background: linear-gradient(90deg, var(--cyan), rgba(61,232,200,0.2)); }
+
+  .dash-bottom {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1rem;
+  }
+  .ai-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.5rem;
+  }
+  .ai-title { font-family: var(--font-head); font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; }
+  .ai-msg {
+    display: flex; align-items: center; gap: 0.75rem;
+    background: var(--bg-card2);
+    border-radius: 12px;
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border 0.2s;
+    border: 1px solid transparent;
+  }
+  .ai-msg:hover { border-color: var(--border); }
+  .ai-msg-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--purple);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
+  }
+  .modes-col { display: flex; flex-direction: column; gap: 0.75rem; }
+  .mode-btn {
+    border-radius: 16px;
+    padding: 1.1rem 1.25rem;
+    cursor: pointer;
+    border: none;
+    display: flex; align-items: center; gap: 0.75rem;
+    transition: transform 0.2s, filter 0.2s;
+    text-align: left;
+  }
+  .mode-btn:hover { transform: translateY(-2px); filter: brightness(1.1); }
+  .mode-name { font-family: var(--font-head); font-size: 1.1rem; font-weight: 700; color: #fff; }
+  .mode-sub { font-size: 0.8rem; opacity: 0.65; color: #fff; }
+  .mode-icon { font-size: 1.4rem; }
+  .mode-focus { background: linear-gradient(135deg, #1a237e, #283593); }
+  .mode-creative { background: linear-gradient(135deg, #4a148c, #6a1b9a); }
+  .mode-recovery { background: linear-gradient(135deg, #1b3a1a, #2e4a2c); }
+
+  /* ── SCREEN 7: FOCUS MODE ── */
+  #focus-mode {
+    background: linear-gradient(160deg, #1a2980 0%, #0d1a5e 60%, #050d2a 100%);
+    align-items: center;
+    justify-content: flex-start;
+    padding: 2rem;
+  }
+  .mode-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; margin-bottom: 3rem;
+  }
+  .back-btn {
+    background: none; border: none; color: rgba(200,220,255,0.7);
+    cursor: pointer; font-family: var(--font-body); font-size: 0.95rem;
+    display: flex; align-items: center; gap: 0.4rem;
+  }
+  .back-btn:hover { color: #fff; }
+  .status-pill {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 99px;
+    padding: 0.4rem 1rem;
+    font-size: 0.85rem;
+    color: rgba(200,220,255,0.7);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+  .focus-center { text-align: center; width: 100%; }
+  .focus-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+  .focus-title {
+    font-family: var(--font-head);
+    font-size: 3rem; font-weight: 800; color: #fff;
+    margin-bottom: 0.5rem;
+  }
+  .focus-sub { color: rgba(200,220,255,0.6); margin-bottom: 2.5rem; }
+  .timer-display {
+    font-family: var(--font-head);
+    font-size: clamp(4rem, 12vw, 7rem);
+    font-weight: 800; color: #fff;
+    margin-bottom: 1rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .session-status {
+    color: rgba(200,220,255,0.6);
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .pulse-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid rgba(200,220,255,0.4);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .pulse-dot::after {
+    content:''; width: 6px; height: 6px;
+    border-radius: 50%; background: rgba(200,220,255,0.6);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:0.4} 50%{opacity:1} }
+  .clarity-card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 18px;
+    padding: 1.5rem 2rem;
+    max-width: 420px;
+    margin: 0 auto;
+    text-align: left;
+  }
+  .clarity-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
+  .clarity-label { color: #3de8c8; font-weight: 500; display: flex; align-items: center; gap: 0.4rem; }
+  .clarity-val { font-family: var(--font-head); font-size: 1.5rem; font-weight: 700; color: #3de8c8; }
+  .clarity-bar-wrap { background: rgba(255,255,255,0.1); border-radius: 99px; height: 6px; margin-bottom: 0.75rem; }
+  .clarity-bar-fill { height: 100%; background: linear-gradient(90deg, #3de8c8, #26d0ce); border-radius: 99px; width: 88%; }
+  .clarity-note { color: rgba(200,220,255,0.5); font-size: 0.8rem; text-align: center; }
+
+  /* ── SCREEN 8: CREATIVE MODE ── */
+  #creative-mode {
+    background: #0d0720;
+    padding: 2rem;
+  }
+  .creative-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  .idea-canvas {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px;
+    padding: 1.5rem;
+    min-height: 340px;
+    position: relative;
+  }
+  .canvas-title { font-size: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .idea-bubble {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border-radius: 99px;
+    font-family: var(--font-head);
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    position: absolute;
+    transition: transform 0.2s;
+  }
+  .idea-bubble:hover { transform: scale(1.05); }
+  .bubble-cyan { background: #00bcd4; color: #000; top: 70px; left: 20px; }
+  .bubble-pink { background: var(--pink); color: #fff; top: 130px; left: 120px; }
+  .bubble-orange { background: var(--orange); color: #fff; top: 220px; left: 15px; }
+  .bubble-teal { background: var(--cyan); color: #000; top: 190px; left: 160px; }
+  .add-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--pink);
+    border: none; color: #fff; font-size: 1.5rem;
+    cursor: pointer;
+    position: absolute; bottom: 20px; right: 20px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 20px rgba(240,79,122,0.4);
+    transition: transform 0.2s;
+  }
+  .add-btn:hover { transform: scale(1.1); }
+  .suggestions-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px;
+    padding: 1.5rem;
+  }
+  .sug-title { color: var(--cyan); font-size: 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+  .sug-item {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.6rem;
+    font-size: 0.9rem;
+    color: rgba(200,210,255,0.8);
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .sug-item:hover { border-color: var(--purple); }
+  .ai-engine {
+    margin-top: 1rem;
+    background: rgba(61,232,200,0.08);
+    border: 1px solid rgba(61,232,200,0.2);
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+  }
+  .ai-engine-name { color: var(--cyan); font-family: var(--font-head); font-weight: 700; }
+  .ai-engine-pct { color: var(--cyan); float: right; font-weight: 700; }
+  .ai-engine-bar { height: 4px; border-radius: 99px; background: rgba(255,255,255,0.1); margin-top: 0.4rem; }
+  .ai-engine-fill { height: 100%; width: 94%; border-radius: 99px; background: var(--cyan); }
+  .creative-pill {
+    background: rgba(120,80,255,0.2);
+    border: 1px solid var(--purple);
+    border-radius: 99px;
+    padding: 0.35rem 1rem;
+    font-size: 0.85rem;
+    color: var(--purple-light);
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  /* ── SCREEN 9: RECOVERY ── */
+  #recovery-mode {
+    background: #120900;
+    align-items: center;
+    padding: 2rem;
+  }
+  .recovery-title {
+    font-family: var(--font-head);
+    font-size: 2.5rem; font-weight: 800;
+    color: #c8956c;
+    text-align: center; margin-bottom: 0.5rem;
+  }
+  .recovery-sub { color: rgba(200,150,100,0.6); text-align: center; margin-bottom: 2.5rem; }
+  .hold-circle {
+    width: 200px; height: 200px; border-radius: 50%;
+    border: 2px solid #c8956c;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin: 0 auto 2.5rem;
+    animation: breathe 5s ease-in-out infinite;
+    cursor: pointer;
+  }
+  @keyframes breathe {
+    0%,100% { transform: scale(1); box-shadow: 0 0 20px rgba(200,150,100,0.2); }
+    50% { transform: scale(1.05); box-shadow: 0 0 40px rgba(200,150,100,0.4); }
+  }
+  .hold-label { color: #c8956c; font-family: var(--font-head); font-size: 1.5rem; font-weight: 700; }
+  .hold-hint { color: rgba(200,150,100,0.5); font-size: 0.9rem; }
+  .session-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(200,150,100,0.2);
+    border-radius: 18px;
+    padding: 1.5rem 2rem;
+    width: 100%; max-width: 420px;
+    text-align: center;
+  }
+  .session-label { color: rgba(200,150,100,0.7); display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 0.4rem; font-size: 0.9rem; }
+  .session-timer { font-family: var(--font-head); font-size: 2.5rem; font-weight: 700; color: var(--cyan); }
+  .session-progress { height: 4px; border-radius: 99px; background: rgba(255,255,255,0.08); margin-top: 0.75rem; }
+  .session-fill { height: 100%; width: 5%; background: var(--cyan); border-radius: 99px; animation: sessionGrow 594s linear forwards; }
+  @keyframes sessionGrow { to { width: 100%; } }
+
+  /* ── SCREEN 10: NOTIFICATIONS ── */
+  #notifications { padding: 2rem; }
+  .notif-header {
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 0.3rem;
+  }
+  .notif-main-title { font-family: var(--font-head); font-size: 2rem; font-weight: 800; }
+  .notif-count { color: rgba(200,210,255,0.4); font-size: 0.85rem; margin-bottom: 1.5rem; }
+  .notif-section-label { color: rgba(200,210,255,0.5); font-size: 0.85rem; font-weight: 500; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .notif-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem; }
+  .notif-grid.single { grid-template-columns: 1fr; max-width: 380px; }
+  .notif-card {
+    background: var(--bg-card);
+    border-radius: 14px;
+    padding: 1rem 1.2rem;
+    display: flex; gap: 0.75rem; align-items: flex-start;
+    border: 1px solid transparent;
+  }
+  .notif-card.urgent { border-color: rgba(255,120,60,0.4); }
+  .notif-card.important-pink { border-color: rgba(200,80,200,0.3); }
+  .notif-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .ni-orange { background: rgba(255,120,60,0.25); color: var(--orange); }
+  .ni-blue { background: rgba(60,120,255,0.25); color: #60a0ff; }
+  .ni-pink { background: rgba(200,60,200,0.25); color: #e060e0; }
+  .ni-gray { background: rgba(150,160,180,0.2); color: rgba(180,190,210,0.8); }
+  .notif-body { flex: 1; }
+  .notif-title-text { font-weight: 600; font-size: 0.9rem; color: #e0e4ff; margin-bottom: 0.2rem; }
+  .notif-time { color: rgba(200,210,255,0.4); font-size: 0.78rem; }
+  .cost-row { display: flex; align-items: center; gap: 0.4rem; justify-content: flex-end; margin-bottom: 0.3rem; font-size: 0.78rem; color: rgba(200,210,255,0.5); }
+  .cost-bars { display: flex; gap: 2px; }
+  .cost-bar { width: 5px; height: 10px; border-radius: 1px; background: rgba(255,255,255,0.1); }
+  .cost-bar.filled.high { background: var(--orange); }
+  .cost-bar.filled.mid { background: var(--amber); }
+  .cost-bar.filled.low { background: var(--cyan); }
+  .cognitive-info {
+    background: rgba(60,80,200,0.1);
+    border: 1px solid rgba(100,140,255,0.2);
+    border-radius: 14px;
+    padding: 1.2rem;
+    margin-top: 1rem;
+  }
+  .cog-title { font-family: var(--font-head); font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+  .cog-desc { color: rgba(200,210,255,0.55); font-size: 0.85rem; line-height: 1.6; }
+
+  /* ── SCREEN 11: SETTINGS ── */
+  #settings { padding: 2rem; }
+  .settings-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+  .settings-title-block { text-align: right; }
+  .settings-title { font-family: var(--font-head); font-size: 2rem; font-weight: 800; }
+  .settings-sub { color: rgba(200,210,255,0.4); font-size: 0.85rem; }
+  .settings-section {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .privacy-section {
+    background: rgba(20,60,20,0.4);
+    border-color: rgba(80,200,80,0.2);
+  }
+  .section-title { font-weight: 600; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; }
+  .toggle-row {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--bg-card2); border-radius: 12px;
+    padding: 0.85rem 1rem; margin-bottom: 0.5rem;
+  }
+  .toggle-info { }
+  .toggle-name { font-size: 0.9rem; font-weight: 500; }
+  .toggle-desc { color: rgba(200,210,255,0.4); font-size: 0.78rem; margin-top: 0.15rem; }
+  .toggle-sw {
+    width: 44px; height: 24px; border-radius: 99px;
+    background: var(--purple); position: relative; cursor: pointer;
+    flex-shrink: 0; transition: background 0.2s;
+  }
+  .toggle-sw::after {
+    content:''; position: absolute;
+    right: 3px; top: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%; background: #fff;
+    transition: right 0.2s;
+  }
+  .toggle-sw.off { background: rgba(255,255,255,0.15); }
+  .toggle-sw.off::after { right: auto; left: 3px; }
+  .settings-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+  .settings-tile {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.25rem;
+    text-align: center; cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .settings-tile:hover { border-color: var(--border-glow); }
+  .tile-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+  .tile-name { font-family: var(--font-head); font-weight: 700; font-size: 0.95rem; }
+  .tile-val { color: rgba(200,210,255,0.4); font-size: 0.8rem; margin-top: 0.2rem; }
+  .version-line { text-align: center; color: rgba(200,210,255,0.25); font-size: 0.8rem; margin-top: 1rem; }
+
+  /* ── NAV PILL (bottom of non-splash screens) ── */
+  .nav-pill {
+    position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%);
+    background: rgba(20,22,45,0.9);
+    border: 1px solid var(--border);
+    border-radius: 99px;
+    padding: 0.5rem 0.75rem;
+    display: flex; gap: 0.25rem;
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+  .nav-item {
+    padding: 0.5rem 0.9rem;
+    border-radius: 99px; cursor: pointer;
+    font-size: 0.8rem; font-weight: 500;
+    color: rgba(200,210,255,0.5);
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .nav-item:hover, .nav-item.active {
+    background: rgba(120,100,255,0.25);
+    color: #d0d8ff;
+  }
+
+  @media (max-width: 640px) {
+    .metrics-row { grid-template-columns: repeat(2, 1fr); }
+    .dash-bottom { grid-template-columns: 1fr; }
+    .creative-grid { grid-template-columns: 1fr; }
+    .hud-grid { grid-template-columns: 1fr; }
+    .eye-card { grid-column: 1; grid-row: auto; width: 100%; }
+    .notif-grid { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: repeat(2, 1fr); }
+    .modes-col { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+
+<!-- ── 01 SPLASH ── -->
+<div class="screen active" id="splash">
+  <svg class="splash-logo" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M40 10 L44 36 L70 40 L44 44 L40 70 L36 44 L10 40 L36 36 Z" stroke="url(#sg)" stroke-width="1.5" fill="none"/>
+    <circle cx="55" cy="20" r="4" stroke="url(#sg)" stroke-width="1.5" fill="none"/>
+    <defs>
+      <linearGradient id="sg" x1="0" y1="0" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+        <stop stop-color="#4fc3f7"/>
+        <stop offset="0.5" stop-color="#b39ddb"/>
+        <stop offset="1" stop-color="#f48fb1"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  <h1 class="splash-title">LUMINA</h1>
+  <p class="splash-sub">Technology that adapts to humans.</p>
+  <button class="btn-primary" onclick="goTo('connect-ring')">Begin Calibration</button>
+</div>
+
+<!-- ── 02 CONNECT RING ── -->
+<div class="screen onboard-screen" id="connect-ring">
+  <div class="onboard-card">
+    <div class="icon-circle">📡</div>
+    <h2 class="onboard-title">Connect Ring</h2>
+    <p class="onboard-sub">Biometric smart ring detected</p>
+    <div class="progress-dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+    <p class="status-line">Device connected</p>
+    <button class="btn-primary" onclick="goTo('sync-neural')">Continue</button>
+  </div>
+</div>
+
+<!-- ── 03 SYNC NEURAL ── -->
+<div class="screen onboard-screen" id="sync-neural">
+  <div class="onboard-card">
+    <div class="icon-circle">〜</div>
+    <h2 class="onboard-title">Sync Neural Profile</h2>
+    <p class="onboard-sub">Building adaptive baseline</p>
+    <div class="progress-dots">
+      <div class="dot active"></div>
+      <div class="dot active"></div>
+      <div class="dot"></div>
+    </div>
+    <p class="status-line">Profile synced</p>
+    <button class="btn-primary" onclick="goTo('enable-spatial')">Continue</button>
+  </div>
+</div>
+
+<!-- ── 04 ENABLE SPATIAL ── -->
+<div class="screen onboard-screen" id="enable-spatial">
+  <div class="onboard-card">
+    <div class="icon-circle">👓</div>
+    <h2 class="onboard-title">Enable Spatial Interaction</h2>
+    <p class="onboard-sub">AR calibration complete</p>
+    <div class="progress-dots">
+      <div class="dot active"></div>
+      <div class="dot active"></div>
+      <div class="dot active"></div>
+    </div>
+    <p class="status-line">Calibration complete</p>
+    <button class="btn-primary" onclick="goTo('calibration')">Continue</button>
+  </div>
+</div>
+
+<!-- ── 05 CALIBRATION HUD ── -->
+<div class="screen" id="calibration" style="padding:2.5rem; align-items:center; justify-content:flex-start;">
+  <div style="width:100%;max-width:700px;margin:0 auto;">
+    <div class="hud-card" style="margin-bottom:1.2rem; grid-column:1/-1;">
+      <div class="hud-label">🧠 Neural Activity
+        <div class="hud-top-right" style="margin-left:auto;"></div>
+      </div>
+      <div class="neural-wave">
+        <svg viewBox="0 0 500 50" preserveAspectRatio="none">
+          <path class="wave-path" d="M0,25 C30,5 60,45 90,25 C120,5 150,45 180,25 C210,5 240,45 270,25 C300,5 330,45 360,25 C390,5 420,45 450,25 C480,5 500,25 500,25"/>
+        </svg>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 180px; gap:1.2rem;">
+      <div>
+        <div class="hud-card heart-card" style="margin-bottom:1.2rem;">
+          <div class="hud-label">♡ Heart Rate <span class="bpm-value">72 BPM</span></div>
+          <div class="bars" id="heartBars"></div>
+        </div>
+        <div class="hud-card progress-section">
+          <div class="big-label">Adaptive profile created.</div>
+          <div class="prog-bar-wrap"><div class="prog-bar-fill" id="calibProg" style="width:0%"></div></div>
+          <div class="prog-pct" id="calibPct">0% Complete</div>
+        </div>
+      </div>
+      <div class="hud-card eye-card">
+        <div class="hud-label">👁 Eye Tracking</div>
+        <div class="eye-grid" id="eyeGrid"></div>
+        <div class="crosshair"><div class="crosshair-dot"></div></div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:2rem;">
+      <button class="btn-primary" onclick="goTo('dashboard')" id="calibBtn" style="opacity:0.4;pointer-events:none">Launching LUMINA…</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 06 DASHBOARD ── -->
+<div class="screen" id="dashboard" style="padding:2rem; align-items:stretch;">
+  <div class="dash-header">
+    <div>
+      <div class="dash-title">LUMINA</div>
+      <div class="dash-date" id="dashDate"></div>
+    </div>
+    <div class="dash-icons">
+      <div class="icon-btn" onclick="goTo('notifications')">🔔</div>
+      <div class="icon-btn" onclick="goTo('settings')">⚙️</div>
+    </div>
+  </div>
+  <div class="metrics-row">
+    <div class="metric-card m-focus">
+      <div class="metric-icon">🎯</div>
+      <div class="metric-val">87</div>
+      <div class="metric-label">Focus Level</div>
+      <div class="metric-bar" style="width:87%"></div>
+    </div>
+    <div class="metric-card m-stress">
+      <div class="metric-icon">↓</div>
+      <div class="metric-val">34</div>
+      <div class="metric-label">Stress Level</div>
+      <div class="metric-bar" style="width:34%"></div>
+    </div>
+    <div class="metric-card m-mental">
+      <div class="metric-icon">↗</div>
+      <div class="metric-val">62</div>
+      <div class="metric-label">Mental Load</div>
+      <div class="metric-bar" style="width:62%"></div>
+    </div>
+    <div class="metric-card m-energy">
+      <div class="metric-icon">⚡</div>
+      <div class="metric-val">91</div>
+      <div class="metric-label">Energy Score</div>
+      <div class="metric-bar" style="width:91%"></div>
+    </div>
+  </div>
+  <div class="dash-bottom">
+    <div class="ai-card">
+      <div class="ai-title">AI Assistant</div>
+      <div class="ai-msg"><div class="ai-msg-icon">◆</div> Creative flow detected.</div>
+      <div class="ai-msg"><div class="ai-msg-icon">✕</div> Mute distractions?</div>
+      <div class="ai-msg"><div class="ai-msg-icon">↻</div> Recovery recommended in 15 min.</div>
+    </div>
+    <div class="modes-col">
+      <button class="mode-btn mode-focus" onclick="goTo('focus-mode')">
+        <span class="mode-icon">👁</span>
+        <div><div class="mode-name">Focus Mode</div><div class="mode-sub">Deep Concentration</div></div>
+      </button>
+      <button class="mode-btn mode-creative" onclick="goTo('creative-mode')">
+        <span class="mode-icon">🎨</span>
+        <div><div class="mode-name">Creative Mode</div><div class="mode-sub">Ideation Canvas</div></div>
+      </button>
+      <button class="mode-btn mode-recovery" onclick="goTo('recovery-mode')">
+        <span class="mode-icon">⊞</span>
+        <div><div class="mode-name">Recovery Mode</div><div class="mode-sub">Restore Energy</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── 07 FOCUS MODE ── -->
+<div class="screen" id="focus-mode" style="background:linear-gradient(160deg,#1a2980 0%,#0d1a5e 60%,#050d2a 100%); padding:2rem;">
+  <div class="mode-nav">
+    <button class="back-btn" onclick="goTo('dashboard')">← Back to Dashboard</button>
+    <div class="status-pill">🔇 Distractions muted</div>
+  </div>
+  <div class="focus-center">
+    <span class="focus-icon">👁</span>
+    <h2 class="focus-title">Focus Mode</h2>
+    <p class="focus-sub">Single-task workspace active</p>
+    <div class="timer-display" id="focusTimer">00:00</div>
+    <div class="session-status"><div class="pulse-dot"></div> Focus session in progress</div>
+    <div class="clarity-card">
+      <div class="clarity-row">
+        <span class="clarity-label">↗ Cognitive Clarity</span>
+        <span class="clarity-val">88%</span>
+      </div>
+      <div class="clarity-bar-wrap"><div class="clarity-bar-fill"></div></div>
+      <div class="clarity-note">Optimal focus detected. Peak performance state.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 08 CREATIVE MODE ── -->
+<div class="screen" id="creative-mode" style="background:#0d0720; padding:2rem;">
+  <div class="mode-nav">
+    <button class="back-btn" onclick="goTo('dashboard')">← Back to Dashboard</button>
+    <div class="creative-pill">◆ Creative flow active</div>
+  </div>
+  <div class="creative-grid">
+    <div class="idea-canvas">
+      <div class="canvas-title">💡 Idea Canvas</div>
+      <span class="idea-bubble bubble-cyan">Neural Interface Design</span>
+      <span class="idea-bubble bubble-pink">Biometric Analytics</span>
+      <span class="idea-bubble bubble-orange">Spatial Computing</span>
+      <span class="idea-bubble bubble-teal">Adaptive AI Engine</span>
+      <button class="add-btn">+</button>
+    </div>
+    <div class="suggestions-card">
+      <div class="sug-title">↓ AI Suggestions</div>
+      <div class="sug-item">Emotion recognition patterns</div>
+      <div class="sug-item">Gesture control framework</div>
+      <div class="sug-item">Holographic UI components</div>
+      <div class="ai-engine">
+        <span class="ai-engine-name">Adaptive AI Engine</span>
+        <span class="ai-engine-pct">94%</span>
+        <div class="ai-engine-bar"><div class="ai-engine-fill"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 09 RECOVERY MODE ── -->
+<div class="screen" id="recovery-mode" style="background:#120900; padding:2rem; align-items:center;">
+  <div class="mode-nav" style="width:100%;">
+    <button class="back-btn" style="color:rgba(200,150,100,0.7);" onclick="goTo('dashboard')">← Back to Dashboard</button>
+    <div class="status-pill" style="border-color:rgba(200,150,100,0.3); color:rgba(200,150,100,0.7);">🔇 Distractions muted</div>
+  </div>
+  <h2 class="recovery-title">Recovery Mode</h2>
+  <p class="recovery-sub">Restore your energy</p>
+  <div class="hold-circle">
+    <div class="hold-label">Hold</div>
+    <div class="hold-hint">Hold gently…</div>
+  </div>
+  <div class="session-card">
+    <div class="session-label"><div class="pulse-dot"></div> Session Time Remaining</div>
+    <div class="session-timer" id="recoveryTimer">9:54</div>
+    <div class="session-progress"><div class="session-fill"></div></div>
+  </div>
+</div>
+
+<!-- ── 10 NOTIFICATIONS ── -->
+<div class="screen" id="notifications" style="padding:2rem;">
+  <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.3rem;">
+    <button class="back-btn" onclick="goTo('dashboard')">← Back to Dashboard</button>
+    <h2 style="font-family:var(--font-head); font-size:2rem; font-weight:800;">Notifications</h2>
+  </div>
+  <div class="notif-count">5 items • Priority ranked</div>
+
+  <div class="notif-section-label">Urgent</div>
+  <div class="notif-grid single" style="margin-bottom:1rem;">
+    <div class="notif-card urgent">
+      <div class="notif-icon ni-orange">⚠</div>
+      <div class="notif-body">
+        <div class="cost-row">⚡ Cost: 8 <div class="cost-bars" id="cb1"></div></div>
+        <div class="notif-title-text">System Calibration needed</div>
+        <div class="notif-time">2 min ago</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notif-section-label">Important</div>
+  <div class="notif-grid" style="margin-bottom:1rem;">
+    <div class="notif-card">
+      <div class="notif-icon ni-blue">🧠</div>
+      <div class="notif-body">
+        <div class="cost-row">⚡ Cost: 5 <div class="cost-bars" id="cb2"></div></div>
+        <div class="notif-title-text">Neural Profile sync complete</div>
+        <div class="notif-time">15 min ago</div>
+      </div>
+    </div>
+    <div class="notif-card important-pink">
+      <div class="notif-icon ni-pink">ℹ</div>
+      <div class="notif-body">
+        <div class="cost-row">⚡ Cost: 4 <div class="cost-bars" id="cb3"></div></div>
+        <div class="notif-title-text">Recovery session recommended</div>
+        <div class="notif-time">1 hour ago</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="notif-section-label">Can Wait</div>
+  <div class="notif-grid" style="margin-bottom:1rem;">
+    <div class="notif-card">
+      <div class="notif-icon ni-gray">⏰</div>
+      <div class="notif-body">
+        <div class="cost-row">⚡ Cost: 2 <div class="cost-bars" id="cb4"></div></div>
+        <div class="notif-title-text">Weekly biometric summary ready</div>
+        <div class="notif-time">3 hours ago</div>
+      </div>
+    </div>
+    <div class="notif-card">
+      <div class="notif-icon ni-gray">ℹ</div>
+      <div class="notif-body">
+        <div class="cost-row">⚡ Cost: 1 <div class="cost-bars" id="cb5"></div></div>
+        <div class="notif-title-text">Software update available</div>
+        <div class="notif-time">5 hours ago</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cognitive-info">
+    <div class="cog-title">ℹ About Cognitive Cost</div>
+    <div class="cog-desc">Each notification is assigned a cognitive cost score (1–10) based on its urgency, complexity, and impact on your current mental state. LUMINA automatically filters and prioritizes notifications to minimize cognitive load.</div>
+  </div>
+</div>
+
+<!-- ── 11 SETTINGS ── -->
+<div class="screen" id="settings" style="padding:2rem;">
+  <div class="settings-header">
+    <button class="back-btn" onclick="goTo('dashboard')">← Back to Dashboard</button>
+    <div class="settings-title-block">
+      <div class="settings-title">Settings</div>
+      <div class="settings-sub">Personalize your experience</div>
+    </div>
+  </div>
+
+  <div class="settings-section privacy-section">
+    <div class="section-title">✈ Privacy First</div>
+    <p style="color:rgba(200,230,200,0.6); font-size:0.85rem; line-height:1.6;">All processing occurs locally on device. Your biometric data never leaves your hardware. LUMINA is designed with end-to-end encryption and zero data collection.</p>
+  </div>
+
+  <div class="settings-section">
+    <div class="section-title">🧠 Neural Preferences</div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-name">Neural Profile Adaptation</div>
+        <div class="toggle-desc">Allow LUMINA to learn from your cognitive patterns</div>
+      </div>
+      <div class="toggle-sw" onclick="this.classList.toggle('off')"></div>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-name">Adaptive Notifications</div>
+        <div class="toggle-desc">Filter notifications based on mental load</div>
+      </div>
+      <div class="toggle-sw" onclick="this.classList.toggle('off')"></div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="section-title">👁 Biometric Permissions</div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-name">Biometric Tracking</div>
+        <div class="toggle-desc">Monitor heart rate, stress, and focus levels</div>
+      </div>
+      <div class="toggle-sw" onclick="this.classList.toggle('off')"></div>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-name">Eye Tracking</div>
+        <div class="toggle-desc">Enable gaze-based interaction and attention monitoring</div>
+      </div>
+      <div class="toggle-sw" onclick="this.classList.toggle('off')"></div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <div class="section-title">🎵 Spatial & Audio</div>
+    <div class="toggle-row">
+      <div class="toggle-info">
+        <div class="toggle-name">Spatial Audio</div>
+        <div class="toggle-desc">Immersive 3D sound for notifications and alerts</div>
+      </div>
+      <div class="toggle-sw" onclick="this.classList.toggle('off')"></div>
+    </div>
+  </div>
+
+  <div class="settings-grid">
+    <div class="settings-tile">
+      <div class="tile-icon">🎨</div>
+      <div class="tile-name">Appearance</div>
+      <div class="tile-val">Customize theme</div>
+    </div>
+    <div class="settings-tile">
+      <div class="tile-icon">🌐</div>
+      <div class="tile-name">Language</div>
+      <div class="tile-val">English (US)</div>
+    </div>
+    <div class="settings-tile">
+      <div class="tile-icon">🔒</div>
+      <div class="tile-name">Security</div>
+      <div class="tile-val">Advanced options</div>
+    </div>
+  </div>
+  <div class="version-line">LUMINA OS v2.5.0 • 2035 Edition</div>
+</div>
+
+<!-- ── BOTTOM NAV ── -->
+<nav class="nav-pill" id="navPill" style="display:none;">
+  <div class="nav-item" data-screen="dashboard" onclick="goTo('dashboard')">Dashboard</div>
+  <div class="nav-item" data-screen="focus-mode" onclick="goTo('focus-mode')">Focus</div>
+  <div class="nav-item" data-screen="creative-mode" onclick="goTo('creative-mode')">Create</div>
+  <div class="nav-item" data-screen="recovery-mode" onclick="goTo('recovery-mode')">Recover</div>
+  <div class="nav-item" data-screen="notifications" onclick="goTo('notifications')">Alerts</div>
+  <div class="nav-item" data-screen="settings" onclick="goTo('settings')">Settings</div>
+</nav>
+
+<script>
+const NAV_SCREENS = ['dashboard','focus-mode','creative-mode','recovery-mode','notifications','settings'];
+
+function goTo(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if(target) { target.classList.add('active'); }
+  const nav = document.getElementById('navPill');
+  if(NAV_SCREENS.includes(id)) {
+    nav.style.display = 'flex';
+    nav.querySelectorAll('.nav-item').forEach(n => {
+      n.classList.toggle('active', n.dataset.screen === id);
+    });
+  } else {
+    nav.style.display = 'none';
+  }
+  if(id === 'calibration') startCalibration();
+  if(id === 'focus-mode') startFocusTimer();
+  if(id === 'recovery-mode') startRecoveryTimer();
+  if(id === 'dashboard') setDashDate();
+  if(id === 'notifications') buildCostBars();
+}
+
+// Calibration animation
+function startCalibration() {
+  const bars = document.getElementById('heartBars');
+  bars.innerHTML = '';
+  for(let i=0; i<30; i++){
+    const b = document.createElement('div');
+    b.className = 'bar';
+    const h = Math.random()*40+5;
+    b.style.height = h+'px';
+    b.style.animationDelay = (Math.random()*1.5)+'s';
+    bars.appendChild(b);
+  }
+  const eyeGrid = document.getElementById('eyeGrid');
+  eyeGrid.innerHTML = '';
+  for(let i=0; i<9; i++){
+    const d = document.createElement('div');
+    d.className = 'eye-dot'; d.id = 'ed'+i;
+    eyeGrid.appendChild(d);
+  }
+  let pct = 0;
+  let active = -1;
+  const interval = setInterval(() => {
+    pct = Math.min(pct + 2, 100);
+    document.getElementById('calibProg').style.width = pct+'%';
+    document.getElementById('calibPct').textContent = pct+'% Complete';
+    const newActive = Math.floor(Math.random()*9);
+    if(active>=0) document.getElementById('ed'+active)?.classList.remove('active');
+    document.getElementById('ed'+newActive)?.classList.add('active');
+    active = newActive;
+    if(pct>=100) {
+      clearInterval(interval);
+      const btn = document.getElementById('calibBtn');
+      btn.style.opacity='1'; btn.style.pointerEvents='auto';
+      btn.textContent = 'Enter LUMINA →';
+    }
+  }, 60);
+}
+
+// Focus timer
+let focusInt;
+function startFocusTimer() {
+  clearInterval(focusInt);
+  let secs = 0;
+  const el = document.getElementById('focusTimer');
+  focusInt = setInterval(() => {
+    secs++;
+    const m = String(Math.floor(secs/60)).padStart(2,'0');
+    const s = String(secs%60).padStart(2,'0');
+    el.textContent = m+':'+s;
+  }, 1000);
+}
+
+// Recovery timer
+let recovInt;
+function startRecoveryTimer() {
+  clearInterval(recovInt);
+  let secs = 594;
+  const el = document.getElementById('recoveryTimer');
+  recovInt = setInterval(() => {
+    if(secs<=0){clearInterval(recovInt);return;}
+    secs--;
+    const m = Math.floor(secs/60);
+    const s = String(secs%60).padStart(2,'0');
+    el.textContent = m+':'+s;
+  }, 1000);
+}
+
+// Dashboard date
+function setDashDate() {
+  const now = new Date();
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('dashDate').textContent =
+    `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}, 2026 • ${now.getHours()%12||12}:${String(now.getMinutes()).padStart(2,'0')} ${now.getHours()>=12?'PM':'AM'}`;
+}
+
+// Cost bars
+function buildCostBars() {
+  const data = {cb1:8, cb2:5, cb3:4, cb4:2, cb5:1};
+  for(const [id, cost] of Object.entries(data)){
+    const el = document.getElementById(id);
+    if(!el) continue;
+    el.innerHTML = '';
+    for(let i=1;i<=10;i++){
+      const b = document.createElement('div');
+      b.className = 'cost-bar';
+      if(i<=cost){
+        b.classList.add('filled');
+        if(cost>=7) b.classList.add('high');
+        else if(cost>=4) b.classList.add('mid');
+        else b.classList.add('low');
+      }
+      el.appendChild(b);
+    }
+  }
+}
+</script>
+</body>
+</html>
