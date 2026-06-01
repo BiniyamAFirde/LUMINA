@@ -135,7 +135,7 @@ MIT — free to use, modify, and build upon.
 ## 👤 Author
 
 **BINIYAM AWALACHEW FIRDE**
-- GitHub: [@YOUR_USERNAME](https://github.com/BiniyamAFirde)
+- GitHub: [@https://github.com/BiniyamAFirde]
 - Figma: [https://www.figma.com/proto/o1ReOSgQQgeF04TA52syWu/LUMINA-individual-project?node-id=0-1&t=i6cmrGMq8cAPp4ey-1](#)
 
 ---
