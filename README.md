@@ -51,7 +51,7 @@ lumina/
 
 The UI was designed in **Figma** before being hand-coded.
 
-> 🔗 [View Figma Design File](#) ← *replace this with your actual Figma link*
+> 🔗 [[View Figma Design File](https://www.figma.com/proto/o1ReOSgQQgeF04TA52syWu/LUMINA-individual-project?node-id=0-1&t=i6cmrGMq8cAPp4ey-1)](#) ← *replace this with your actual Figma link*
 
 Design language: dark space aesthetic, glassmorphism cards, gradient typography, and a custom star-field background — built for a near-future AR/wearable context.
 
