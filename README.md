@@ -8,7 +8,7 @@ LUMINA is a futuristic, biometric-aware OS concept UI — a fully interactive HT
 
 ## 🌌 Live Preview
 
-> Open `index.html` directly in your browser — no server or build step required.
+> Open `file:///Users/macbookpro13/lumina/luminia.html` directly in your browser — no server or build step required.
 
 ---
 
@@ -51,7 +51,7 @@ lumina/
 
 The UI was designed in **Figma** before being hand-coded.
 
-> 🔗 [[View Figma Design File](https://www.figma.com/proto/o1ReOSgQQgeF04TA52syWu/LUMINA-individual-project?node-id=0-1&t=i6cmrGMq8cAPp4ey-1)](#) ← *replace this with your actual Figma link*
+> 🔗 [[View Figma Design File](https://www.figma.com/proto/o1ReOSgQQgeF04TA52syWu/LUMINA-individual-project?node-id=0-1&t=i6cmrGMq8cAPp4ey-1)]
 
 Design language: dark space aesthetic, glassmorphism cards, gradient typography, and a custom star-field background — built for a near-future AR/wearable context.
 
@@ -81,7 +81,10 @@ No npm install. No build step. No dependencies. Just open and go.
 
 | Splash | Dashboard | Focus Mode |
 |--------|-----------|------------|
-| *(add screenshot)* | *(add screenshot)* | *(add screenshot)* |
+| *<img width="1434" height="773" alt="Screenshot 2026-06-03 at 20 22 18" src="https://github.com/user-attachments/assets/f5b4c6c9-d983-49c9-a51c-69c38d6d6447" />
+* | *<img width="1428" height="766" alt="Screenshot 2026-06-03 at 20 23 22" src="https://github.com/user-attachments/assets/ab18d64c-ad1a-44e1-af46-fc58ad96e2c3" />
+* | *<img width="1431" height="771" alt="Screenshot 2026-06-03 at 20 23 38" src="https://github.com/user-attachments/assets/fa89ad60-e5d5-48a1-95f8-ec88308c73bc" />
+* |
 
 > Tip: Take screenshots and drop them in a `/screenshots` folder, then update the table above with `![Dashboard](screenshots/dashboard.png)`.
 
