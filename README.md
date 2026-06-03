@@ -8,7 +8,7 @@ LUMINA is a futuristic, biometric-aware OS concept UI — a fully interactive HT
 
 ## 🌌 Live Preview
 
-> 🔗 [Open directly in your browser](file:///Users/macbookpro13/lumina/luminia.html) — no server or build step required.
+> 🔗 <a href="file:///Users/macbookpro13/lumina/luminia.html">Open directly in your browser</a> — no server or build step required.
 
 ---
 
